@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { clearCart } from "../lib/cartLocal";
 
 export function SuccessPage() {
   const navigate = useNavigate();
+
+  // Clear the cart when user reaches success page (indicating successful payment)
+  useEffect(() => {
+    clearCart();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -m-6 p-6">
       <div className="max-w-4xl mx-auto">

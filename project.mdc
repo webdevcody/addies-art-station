@@ -1,0 +1,381 @@
+# Addie's Art Station - Design System Documentation
+
+## 🎨 Overview
+
+Addie's Art Station is a premium online art marketplace that combines artistic creativity with modern web design. The design system emphasizes visual beauty, professionalism, and user delight while maintaining the personal, handcrafted feel of an independent artist's work.
+
+## 🎯 Design Philosophy
+
+### Core Principles
+
+1. **Artistic Expression**: Every element should feel crafted with care and attention to detail
+2. **Modern Professionalism**: Clean, contemporary design that builds trust and credibility
+3. **Emotional Connection**: Design should evoke joy, creativity, and personal connection
+4. **Seamless Experience**: Consistent, intuitive user experience across all touchpoints
+5. **Visual Hierarchy**: Clear information structure that guides users naturally
+
+## 🎨 Visual Identity
+
+### Color Palette
+
+#### Primary Colors
+
+- **Purple**: `#a855f7` (purple-500) to `#7c3aed` (purple-600)
+- **Pink**: `#ec4899` (pink-500) to `#db2777` (pink-600)
+- **Gradient**: `from-pink-500 to-purple-500` (primary brand gradient)
+
+#### Secondary Colors
+
+- **Gray Light**: `#f9fafb` (gray-50) to `#e5e7eb` (gray-200)
+- **Gray Dark**: `#111827` (gray-900) to `#374151` (gray-700)
+- **Success**: `#10b981` (green-500)
+- **Warning**: `#f59e0b` (amber-500)
+- **Error**: `#ef4444` (red-500)
+
+#### Usage Guidelines
+
+- Use purple/pink gradients for primary actions and brand elements
+- Gray tones for backgrounds and supporting content
+- Success green for available items and positive states
+- Error red for destructive actions and warnings
+
+### Typography
+
+#### Font Hierarchy
+
+- **Display**: `text-5xl md:text-6xl font-bold` - Hero headings
+- **H1**: `text-4xl font-bold` - Page titles
+- **H2**: `text-3xl font-bold` - Section headings
+- **H3**: `text-2xl font-bold` - Subsection headings
+- **H4**: `text-xl font-bold` - Card titles
+- **Body Large**: `text-lg` - Important body text
+- **Body**: `text-base` - Standard body text
+- **Small**: `text-sm` - Supporting text, captions
+
+#### Text Colors
+
+- **Primary**: `text-gray-900 dark:text-gray-100`
+- **Secondary**: `text-gray-600 dark:text-gray-300`
+- **Muted**: `text-gray-500 dark:text-gray-400`
+- **Brand**: `text-purple-600 dark:text-purple-400`
+- **Accent**: `text-pink-600 dark:text-pink-400`
+
+## 🧩 Component System
+
+### Layout Components
+
+#### Page Container
+
+```tsx
+<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -m-6 p-6">
+  <div className="max-w-6xl mx-auto">{/* Page content */}</div>
+</div>
+```
+
+#### Card Components
+
+```tsx
+// Primary Card
+<div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+
+// Secondary Card
+<div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-600">
+
+// Gradient Card
+<div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-3xl p-8 shadow-lg border border-purple-200 dark:border-purple-700">
+```
+
+### Interactive Components
+
+#### Primary Button
+
+```tsx
+<button className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-2xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+  Button Text ✨
+</button>
+```
+
+#### Secondary Button
+
+```tsx
+<button className="px-6 py-3 border-2 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 rounded-2xl font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300 transform hover:scale-105">
+  Button Text
+</button>
+```
+
+#### Icon Button
+
+```tsx
+<button className="p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300 group">
+  <Icon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+</button>
+```
+
+### Navigation Components
+
+#### Header Structure
+
+- Sticky positioning with backdrop blur
+- Brand logo with gradient icon
+- Navigation links with emoji icons
+- Responsive mobile menu
+- Admin and cart buttons
+
+#### Navigation Links
+
+```tsx
+<NavLink className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 hover:scale-105">
+  <span className="text-lg">{emoji}</span>
+  <span>{label}</span>
+</NavLink>
+```
+
+## 🎨 Page Patterns
+
+### Header Section Pattern
+
+Every page should start with a gradient header that includes:
+
+```tsx
+<div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-3xl shadow-xl mb-8">
+  <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-4xl">{pageEmoji}</span>
+        <h1 className="text-4xl font-bold">{pageTitle}</h1>
+      </div>
+      <p className="text-purple-100 text-lg">{pageDescription}</p>
+    </div>
+    <div className="text-6xl opacity-80">{decorativeEmoji}</div>
+  </div>
+</div>
+```
+
+### Loading States
+
+```tsx
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="flex items-center gap-3">
+        <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+        <span className="text-gray-600 dark:text-gray-400">
+          Loading {context}...
+        </span>
+      </div>
+    </div>
+  );
+}
+```
+
+### Empty States
+
+```tsx
+<div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+  <div className="text-8xl mb-6 opacity-50">{emptyStateEmoji}</div>
+  <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+    {emptyStateTitle}
+  </h2>
+  <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
+    {emptyStateDescription}
+  </p>
+  {/* Call to action button */}
+</div>
+```
+
+## 🌟 Visual Elements
+
+### Emoji Usage
+
+Emojis are used strategically throughout the interface to:
+
+- Add personality and warmth
+- Provide visual context and hierarchy
+- Create emotional connection
+- Make the interface more approachable
+
+#### Common Emoji Patterns
+
+- **Art/Creativity**: 🎨 🖼️ ✨ 🎭
+- **Shopping**: 🛍️ 💳 📦 🚚
+- **Communication**: 💌 📞 💬 📧
+- **Status**: ✅ 🔴 ⏳ 📋
+- **Emotions**: 💕 😊 🎉 👋
+- **Actions**: 🔑 ✏️ 👑 ⭐
+
+### Animations & Transitions
+
+#### Hover Effects
+
+- **Buttons**: Scale (1.05) + shadow enhancement
+- **Cards**: Translate Y (-2px to -8px) + shadow enhancement
+- **Images**: Scale (1.05 to 1.10)
+- **Icons**: Scale (1.10)
+
+#### Transition Standards
+
+- **Duration**: `duration-300` (300ms) for most interactions
+- **Duration**: `duration-500` (500ms) for image transforms
+- **Timing**: Use browser defaults (ease) for natural feel
+- **Properties**: `transition-all` for comprehensive effects
+
+### Spacing System
+
+#### Container Spacing
+
+- **Page padding**: `p-6` (24px)
+- **Card padding**: `p-8` (32px) for main cards, `p-6` (24px) for secondary
+- **Section margins**: `mb-8` (32px) between major sections
+- **Element gaps**: `gap-4` (16px) to `gap-8` (32px) depending on hierarchy
+
+#### Grid Systems
+
+- **Mobile**: Single column or 2-column
+- **Tablet**: 2-3 columns for cards
+- **Desktop**: Up to 4 columns for product grids
+- **Use responsive breakpoints**: `sm:` `md:` `lg:` `xl:`
+
+## 🎨 Implementation Guidelines
+
+### New Page Checklist
+
+When creating a new page, ensure:
+
+1. **Background**: Full-screen gradient background
+2. **Container**: Max-width container with proper padding
+3. **Header**: Gradient header with emoji, title, and description
+4. **Cards**: Translucent cards with backdrop-blur
+5. **Buttons**: Gradient primary buttons, bordered secondary buttons
+6. **Loading**: Proper loading states with spinners
+7. **Empty States**: Thoughtful empty states with emojis
+8. **Responsive**: Mobile-first responsive design
+9. **Dark Mode**: Full dark mode support
+10. **Animations**: Hover effects and smooth transitions
+
+### Code Standards
+
+#### Component Structure
+
+```tsx
+export function NewPage() {
+  // Hooks and state
+  const navigate = useNavigate();
+  const data = useQuery(api.something.list, {}) || [];
+  const isLoading = data === undefined;
+
+  // Helper functions
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -m-6 p-6">
+        <div className="max-w-6xl mx-auto">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
+  // Main render
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 -m-6 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        {/* Content */}
+        {/* Footer/CTA */}
+      </div>
+    </div>
+  );
+}
+```
+
+#### CSS Class Patterns
+
+- **Backgrounds**: Always use gradient backgrounds for full pages
+- **Cards**: Use backdrop-blur and transparency for depth
+- **Borders**: `rounded-3xl` for containers, `rounded-2xl` for cards, `rounded-xl` for buttons
+- **Shadows**: `shadow-lg` for cards, `shadow-xl` for important elements
+- **Hover**: Always include hover states with transforms and color changes
+
+### Accessibility
+
+#### Requirements
+
+- **Color Contrast**: Ensure WCAG AA compliance for all text
+- **Focus States**: Visible focus indicators for keyboard navigation
+- **Alt Text**: Descriptive alt text for all images
+- **Semantic HTML**: Use proper heading hierarchy and semantic elements
+- **ARIA Labels**: For interactive elements without visible text
+
+#### Implementation
+
+- Use semantic HTML elements (`<header>`, `<nav>`, `<main>`, `<section>`)
+- Include `aria-label` for icon buttons
+- Ensure proper heading hierarchy (h1 → h2 → h3)
+- Test with keyboard navigation and screen readers
+
+## 🚀 Performance Considerations
+
+### Optimization Guidelines
+
+- **Images**: Use optimized formats (WebP, AVIF) with fallbacks
+- **Animations**: Use CSS transforms for better performance
+- **Loading**: Implement skeleton screens for better perceived performance
+- **Code Splitting**: Lazy load non-critical components
+- **Caching**: Leverage browser caching for static assets
+
+### Bundle Size
+
+- Keep component libraries minimal
+- Use tree shaking for utility libraries
+- Optimize emoji usage (consider SVG alternatives for critical icons)
+- Monitor bundle size with build tools
+
+## 🎨 Brand Voice
+
+### Tone of Voice
+
+- **Warm & Personal**: Like talking to a friend who's an artist
+- **Professional & Trustworthy**: Reliable for purchasing decisions
+- **Creative & Inspiring**: Encourages artistic appreciation
+- **Approachable & Inclusive**: Welcoming to all art lovers
+
+### Copy Guidelines
+
+- Use first person when speaking as the artist ("I create...", "My artwork...")
+- Include emotional language that connects with art appreciation
+- Be specific about craftsmanship and quality
+- Use encouraging language for potential customers
+- Include calls-to-action that feel inviting, not pushy
+
+## 🔄 Maintenance
+
+### Regular Updates
+
+- Review and update color accessibility quarterly
+- Test responsive design on new device sizes
+- Update emoji usage as platform support evolves
+- Refresh animations to stay current with web trends
+- Monitor performance metrics and optimize as needed
+
+### Documentation Updates
+
+- Update this document when new patterns are established
+- Include new component examples as they're created
+- Document any breaking changes to the design system
+- Maintain a changelog for major design updates
+
+---
+
+_This design system reflects the artistic, professional, and delightful experience we want every user to have when visiting Addie's Art Station. Every design decision should support the goal of creating an emotionally engaging platform that celebrates art and creativity._ ✨🎨
+description:
+globs:
+alwaysApply: false
+
+---

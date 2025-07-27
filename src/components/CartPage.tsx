@@ -1,9 +1,10 @@
 import { useLocalCart, clearCart, removeFromCart } from "../lib/cartLocal";
-import { useQuery } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Link } from "react-router-dom";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "./Button";
+import { useState } from "react";
 
 // Loading component for better UX
 function LoadingSpinner() {
@@ -21,12 +22,15 @@ function LoadingSpinner() {
 
 export function CartPage() {
   const [cart, setCart] = useLocalCart();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   // Convert productId strings to Convex Id<"products"> for the query
   const productIds = cart.map((item) => item.productId as Id<"products">);
   const products = useQuery(api.products.getMany, { ids: productIds }) || [];
   const isLoading =
     useQuery(api.products.getMany, { ids: productIds }) === undefined &&
     cart.length > 0;
+
+  const createCheckoutSession = useAction(api.checkout.createCheckoutSession);
 
   const getProduct = (id: string) =>
     products.find((p) => p && p._id === (id as Id<"products">));
@@ -37,6 +41,35 @@ export function CartPage() {
 
   const handleClear = () => {
     clearCart();
+  };
+
+  const handleCheckout = async () => {
+    try {
+      setIsCheckingOut(true);
+
+      // Prepare cart items in the format expected by the mutation
+      const cartItems = cart.map((item) => ({
+        productId: item.productId as Id<"products">,
+        quantity: item.quantity,
+      }));
+
+      const result = await createCheckoutSession({
+        cartItems,
+        siteUrl: window.location.origin,
+      });
+
+      if (result.url) {
+        // Redirect to Stripe checkout - cart will be cleared after successful payment
+        window.location.href = result.url;
+      } else {
+        throw new Error("Failed to create checkout session");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("There was an error processing your checkout. Please try again.");
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   const total = cart.reduce((sum, item) => {
@@ -131,9 +164,12 @@ export function CartPage() {
 
                         {/* Product Details */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                          <Link
+                            to={`/product/${item.productId}`}
+                            className="font-bold text-xl block hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                          >
                             {product.title}
-                          </h3>
+                          </Link>
                           <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
                             {product.description}
                           </p>
@@ -213,12 +249,20 @@ export function CartPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/checkout"
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-center py-4 px-6 rounded-2xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                <button
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut || cart.length === 0}
+                  className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-center py-4 px-6 rounded-2xl font-bold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  Proceed to Checkout ✨
-                </Link>
+                  {isCheckingOut ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Processing...
+                    </span>
+                  ) : (
+                    "Proceed to Checkout ✨"
+                  )}
+                </button>
                 <button
                   onClick={handleClear}
                   className="px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-2xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
