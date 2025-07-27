@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { addToCart, useLocalCart } from "../lib/cartLocal";
@@ -13,6 +13,7 @@ export function ProductPage({
   productId?: string;
 }) {
   const { productId: routeProductId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
   // Convert to Convex Id type if present
   const productId = (propProductId || routeProductId) as
     | Id<"products">
@@ -21,6 +22,7 @@ export function ProductPage({
     api.products.get,
     productId ? { id: productId } : "skip"
   );
+  const isAdmin = useQuery(api.admin.isAdmin) || false;
   const [cart] = useLocalCart();
   const [added, setAdded] = useState(false);
 
@@ -56,9 +58,19 @@ export function ProductPage({
       <div className="mb-6 text-gray-600 dark:text-gray-300">
         {product.description}
       </div>
-      <Button variant="primary" onClick={handleAdd} disabled={added}>
-        {added ? "Added!" : "Add to Cart"}
-      </Button>
+      <div className="flex gap-4">
+        <Button variant="primary" onClick={handleAdd} disabled={added}>
+          {added ? "Added!" : "Add to Cart"}
+        </Button>
+        {isAdmin && (
+          <Button
+            variant="outlineSecondary"
+            onClick={() => void navigate(`/product/${product._id}/edit`)}
+          >
+            Edit Product
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

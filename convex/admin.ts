@@ -1,8 +1,80 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "./_generated/server";
+import {
+  mutation,
+  query,
+  internalAction,
+  internalMutation,
+  QueryCtx,
+  MutationCtx,
+} from "./_generated/server";
+import {
+  customMutation,
+  customQuery,
+  customCtx,
+} from "convex-helpers/server/customFunctions";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { createAccount } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
+
+/**
+ * Custom mutation builder that automatically checks admin privileges
+ * Throws an error if the user is not authenticated or not an admin
+ */
+export const adminMutation = customMutation(
+  mutation,
+  customCtx(async (ctx: MutationCtx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const adminUser = await ctx.db
+      .query("adminUsers")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!adminUser) {
+      throw new Error("Not authorized - admin privileges required");
+    }
+
+    return {
+      adminUserId: adminUser._id,
+      userId,
+    };
+  })
+);
+
+/**
+ * Custom query builder that automatically checks admin privileges
+ * Throws an error if the user is not authenticated or not an admin
+ */
+export const adminQuery = customQuery(
+  query,
+  customCtx(async (ctx: QueryCtx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const adminUser = await ctx.db
+      .query("adminUsers")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!adminUser) {
+      throw new Error("Not authorized - admin privileges required");
+    }
+
+    return {
+      adminUserId: adminUser._id,
+      userId,
+    };
+  })
+);
 
 export const isAdmin = query({
+  args: {},
+  returns: v.boolean(),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return false;
@@ -12,59 +84,35 @@ export const isAdmin = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    return adminUser?.isAdmin || false;
+    return adminUser ? true : false;
   },
 });
 
-export const createAdminUser = internalMutation({
-  args: {
-    email: v.string(),
-    password: v.string(),
-  },
-  returns: v.object({
-    userId: v.id("users"),
-    adminId: v.id("adminUsers"),
-  }),
+export const createAdminUser = internalAction({
+  args: { email: v.string(), password: v.string() },
   handler: async (ctx, args) => {
-    // Check if user with this email already exists
-    const existingAccount = await ctx.db
-      .query("authAccounts")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("provider"), "password"),
-          q.eq(q.field("providerAccountId"), args.email)
-        )
-      )
-      .first();
-
-    if (existingAccount) {
-      throw new Error(`User with email ${args.email} already exists`);
-    }
-
-    // Create user account
-    const userId = await ctx.db.insert("users", {
-      email: args.email,
-      emailVerificationTime: Date.now(),
-      isAnonymous: false,
-    });
-
-    // Create password credential for the user
-    await ctx.db.insert("authAccounts", {
-      userId: userId,
+    const { user } = await createAccount(ctx, {
       provider: "password",
-      providerAccountId: args.email,
-      secret: args.password, // Note: In production, this should be properly hashed
+      account: { id: args.email, secret: args.password },
+      profile: {
+        email: args.email,
+        emailVerificationTime: Date.now(),
+        isAnonymous: false,
+      },
     });
 
-    // Add user to adminUsers table
-    const adminId = await ctx.db.insert("adminUsers", {
-      userId: userId,
-      isAdmin: true,
+    await ctx.runMutation(internal.admin.insertAdminUser, {
+      userId: user._id,
     });
+  },
+});
 
-    return {
-      userId,
-      adminId,
-    };
+export const insertAdminUser = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.id("adminUsers"),
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("adminUsers", {
+      userId: args.userId,
+    });
   },
 });

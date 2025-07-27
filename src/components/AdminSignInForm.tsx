@@ -15,8 +15,10 @@ export function AdminSignInForm() {
           e.preventDefault();
           setSubmitting(true);
           const formData = new FormData(e.target as HTMLFormElement);
+          formData.append("flow", "signIn");
           void signIn("password", formData).catch((error) => {
-            let toastTitle = "Could not sign in. Please check your credentials.";
+            let toastTitle =
+              "Could not sign in. Please check your credentials.";
             if (error.message.includes("Invalid password")) {
               toastTitle = "Invalid email or password. Please try again.";
             }

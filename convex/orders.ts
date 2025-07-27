@@ -7,12 +7,14 @@ export const createOrder = internalMutation({
     userId: v.id("users"),
     stripeSessionId: v.string(),
     total: v.number(),
-    items: v.array(v.object({
-      productId: v.id("products"),
-      title: v.string(),
-      price: v.number(),
-      quantity: v.number(),
-    })),
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        title: v.string(),
+        price: v.number(),
+        quantity: v.number(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("orders", {
@@ -26,10 +28,12 @@ export const fulfillOrder = internalMutation({
   args: { stripeSessionId: v.string() },
   handler: async (ctx, args) => {
     console.log("Fulfilling order for session:", args.stripeSessionId);
-    
+
     const order = await ctx.db
       .query("orders")
-      .withIndex("by_stripe_session", (q) => q.eq("stripeSessionId", args.stripeSessionId))
+      .withIndex("by_stripe_session", (q) =>
+        q.eq("stripeSessionId", args.stripeSessionId)
+      )
       .first();
 
     if (!order) {
@@ -63,7 +67,7 @@ export const fulfillOrder = internalMutation({
       .withIndex("by_user", (q) => q.eq("userId", order.userId))
       .collect();
 
-    await Promise.all(cartItems.map(item => ctx.db.delete(item._id)));
+    await Promise.all(cartItems.map((item) => ctx.db.delete(item._id)));
     console.log("Order fulfillment completed successfully");
   },
 });
@@ -78,24 +82,5 @@ export const getOrders = query({
       .query("orders")
       .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
-  },
-});
-
-// Admin function to view all orders for debugging
-export const getAllOrders = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
-
-    // Check if user is admin
-    const adminUser = await ctx.db
-      .query("adminUsers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
-    
-    if (!adminUser?.isAdmin) return [];
-
-    return await ctx.db.query("orders").collect();
   },
 });

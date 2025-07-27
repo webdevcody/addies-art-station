@@ -22,19 +22,24 @@ const applicationTables = {
   orders: defineTable({
     userId: v.id("users"),
     stripeSessionId: v.string(),
-    status: v.union(v.literal("pending"), v.literal("completed"), v.literal("shipped")),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("completed"),
+      v.literal("shipped")
+    ),
     total: v.number(), // in cents
-    items: v.array(v.object({
-      productId: v.id("products"),
-      title: v.string(),
-      price: v.number(),
-      quantity: v.number(),
-    })),
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        title: v.string(),
+        price: v.number(),
+        quantity: v.number(),
+      })
+    ),
   }).index("by_stripe_session", ["stripeSessionId"]),
 
   adminUsers: defineTable({
     userId: v.id("users"),
-    isAdmin: v.boolean(),
   }).index("by_user", ["userId"]),
 };
 

@@ -73,7 +73,7 @@ export function Footer() {
           <ul>
             <li>
               <Link
-                to="/secret-admin-portal-xyz789"
+                to="/login"
                 className="hover:text-purple-600 dark:hover:text-purple-400"
               >
                 Admin Login

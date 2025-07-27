@@ -16,12 +16,10 @@ export function CartPage() {
 
   const handleRemove = (productId: string) => {
     removeFromCart(productId);
-    setCart(cart.filter((item) => item.productId !== productId));
   };
 
   const handleClear = () => {
     clearCart();
-    setCart([]);
   };
 
   const total = cart.reduce((sum, item) => {
