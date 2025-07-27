@@ -24,8 +24,8 @@ const applicationTables = {
     stripeSessionId: v.string(),
     status: v.union(
       v.literal("pending"),
-      v.literal("completed"),
-      v.literal("shipped")
+      v.literal("toShip"),
+      v.literal("completed")
     ),
     total: v.number(), // in cents
     items: v.array(
@@ -36,7 +36,9 @@ const applicationTables = {
         quantity: v.number(),
       })
     ),
-  }).index("by_stripe_session", ["stripeSessionId"]),
+  })
+    .index("by_stripe_session", ["stripeSessionId"])
+    .index("by_status", ["status"]),
 
   adminUsers: defineTable({
     userId: v.id("users"),

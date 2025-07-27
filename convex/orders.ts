@@ -84,3 +84,42 @@ export const getOrders = query({
       .collect();
   },
 });
+
+export const getOrdersByStatus = query({
+  args: {
+    status: v.union(
+      v.literal("pending"),
+      v.literal("toShip"),
+      v.literal("completed")
+    ),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("orders"),
+      _creationTime: v.number(),
+      userId: v.id("users"),
+      stripeSessionId: v.string(),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("toShip"),
+        v.literal("completed")
+      ),
+      total: v.number(),
+      items: v.array(
+        v.object({
+          productId: v.id("products"),
+          title: v.string(),
+          price: v.number(),
+          quantity: v.number(),
+        })
+      ),
+    })
+  ),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("orders")
+      .withIndex("by_status", (q) => q.eq("status", args.status))
+      .order("desc")
+      .collect();
+  },
+});
