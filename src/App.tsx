@@ -9,6 +9,7 @@ import {
   Navigate,
   useParams,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import { LandingPage } from "./components/LandingPage";
 import { BrowsePage } from "./components/BrowsePage";
@@ -25,53 +26,72 @@ import { TermsOfServicePage } from "./components/TermsOfServicePage";
 import { PrivacyPolicyPage } from "./components/PrivacyPolicyPage";
 import { ReturnPolicyPage } from "./components/ReturnPolicyPage";
 
+function AppContent() {
+  const location = useLocation();
+  const isAdminPage = location.pathname === "/admin";
+
+  if (isAdminPage) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Routes>
+          <Route
+            path="/admin"
+            element={
+              <Authenticated>
+                <RequireAdmin>
+                  <AdminPage />
+                </RequireAdmin>
+              </Authenticated>
+            }
+          />
+        </Routes>
+        <Toaster />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <Header />
+
+      <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/browse" element={<BrowsePage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/return-policy" element={<ReturnPolicyPage />} />
+          <Route path="/login" element={<AdminLoginPage />} />
+
+          <Route path="/product/:productId" element={<ProductPageRoute />} />
+          <Route
+            path="/product/:productId/edit"
+            element={
+              <Authenticated>
+                <RequireAdmin>
+                  <EditProductPage />
+                </RequireAdmin>
+              </Authenticated>
+            }
+          />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/success" element={<SuccessPage />} />
+
+          {/* Redirect unknown routes to landing */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
+      <Toaster />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-        <Header />
-
-        <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/browse" element={<BrowsePage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/return-policy" element={<ReturnPolicyPage />} />
-            <Route path="/login" element={<AdminLoginPage />} />
-
-            <Route path="/product/:productId" element={<ProductPageRoute />} />
-            <Route
-              path="/product/:productId/edit"
-              element={
-                <Authenticated>
-                  <RequireAdmin>
-                    <EditProductPage />
-                  </RequireAdmin>
-                </Authenticated>
-              }
-            />
-            <Route path="/cart" element={<CartPage />} />
-            <Route
-              path="/admin"
-              element={
-                <Authenticated>
-                  <RequireAdmin>
-                    <AdminPage />
-                  </RequireAdmin>
-                </Authenticated>
-              }
-            />
-            <Route path="/success" element={<SuccessPage />} />
-
-            {/* Redirect unknown routes to landing */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        <Footer />
-        <Toaster />
-      </div>
+      <AppContent />
     </Router>
   );
 }

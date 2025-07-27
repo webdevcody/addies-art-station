@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 type NavItem = {
   id: string;
@@ -25,6 +27,8 @@ function LoadingSpinner() {
 
 export function AdminPage() {
   const [activeNav, setActiveNav] = useState("dashboard");
+  const navigate = useNavigate();
+  const { signOut } = useAuthActions();
 
   const products = useQuery(api.products.list, {}) || [];
   const productsLoading = useQuery(api.products.list, {}) === undefined;
@@ -43,6 +47,20 @@ export function AdminPage() {
     (p) => p.status === "available"
   ).length;
   const soldProducts = products.filter((p) => p.status === "sold").length;
+
+  const handleGoToBrowse = () => {
+    void navigate("/browse");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      void navigate("/");
+      toast.success("Signed out successfully");
+    } catch (error) {
+      toast.error("Failed to sign out");
+    }
+  };
 
   const navItems: NavItem[] = [
     {
@@ -464,92 +482,123 @@ export function AdminPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Side Navigation */}
-      <div className="w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              👑
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Admin Panel
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Addie's Art Station
-              </p>
+      {/* Scrollable Side Navigation */}
+      <div className="flex-shrink-0 w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 shadow-lg overflow-y-auto">
+        <div className="p-6">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                👑
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Admin Panel
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Addie's Art Station
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <nav className="space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveNav(item.id)}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
-                item.active
-                  ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </div>
-              {item.badge && item.badge > 0 && (
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    item.active
-                      ? "bg-white/20 text-white"
-                      : "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200"
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {/* Quick Stats */}
-        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-            Quick Stats
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">
-                Artworks:
-              </span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">
-                {products.length}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Orders:</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">
-                {pendingOrders.length +
-                  completedOrders.length +
-                  shippedOrders.length}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Revenue:</span>
-              <span className="font-medium text-purple-600 dark:text-purple-400">
-                {formatCurrency(
-                  completedOrders.reduce((sum, order) => sum + order.total, 0) /
-                    100
+          <nav className="space-y-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveNav(item.id)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
+                  item.active
+                    ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.badge && item.badge > 0 && (
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      item.active
+                        ? "bg-white/20 text-white"
+                        : "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
                 )}
-              </span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Quick Stats */}
+          <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Quick Stats
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Artworks:
+                </span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">
+                  {products.length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Orders:
+                </span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">
+                  {pendingOrders.length +
+                    completedOrders.length +
+                    shippedOrders.length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Revenue:
+                </span>
+                <span className="font-medium text-purple-600 dark:text-purple-400">
+                  {formatCurrency(
+                    completedOrders.reduce(
+                      (sum, order) => sum + order.total,
+                      0
+                    ) / 100
+                  )}
+                </span>
+              </div>
             </div>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="mt-8 space-y-2">
+            <button
+              onClick={handleGoToBrowse}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <span className="text-xl">🛍️</span>
+              <span className="font-medium">Browse Products</span>
+            </button>
+
+            <button
+              onClick={() => {
+                void handleSignOut();
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-300 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              <span className="text-xl">🚪</span>
+              <span className="font-medium">Sign Out</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto p-8">
-        <div className="max-w-7xl mx-auto">{renderContent()}</div>
+      {/* Scrollable Main Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">{renderContent()}</div>
+        </div>
       </div>
     </div>
   );
